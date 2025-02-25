@@ -8,7 +8,7 @@ function main() {
     }
     
     // Define a cor de fundo
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clearColor(0.0, 0.0, 0.0, 0.4);
     gl.clear(gl.COLOR_BUFFER_BIT);
     
     // Carregar shaders
@@ -31,14 +31,47 @@ function initBuffers(gl) {
     const positionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
     
-    const positions = [
-        -0.5,  0.5,
-         0.5,  0.5,
-        -0.5, -0.5,
-         0.5, -0.5,
-    ];
     
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+    const positions = [
+        -0.5, 0.5,
+        0.5, 0.5,
+        0.0, -0.5,
+        0.0, -0.5,
+    ];
+    // Triangulo de Cabeça para Baixo
+    
+    
+    
+    // const positions = [
+    //     0.0, 0.8,
+    //     -0.8, 0.0,
+    //     0.8, 0.0,
+    //     0.0, -0.8,
+    // ];
+    // Losango
+   
+   
+    // const positions = [
+    //     0.0, 0.8,
+    //     0.8, 0.0,
+    //     -0.8, 0.0,
+    //     0.4, -0.8,
+    //     -0.4, -0.8,
+    // ];
+    // Pentagono
+
+    // const positions = [
+    //     -0.4, 0.8,
+    //     0.4, 0.8,
+    //     -0.8, 0.0,
+    //     0.8, 0.0,
+    //     -0.4, -0.8,
+    //     0.4, -0.8,
+    // ];
+    // Hexagono
+
+    
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
     return { position: positionBuffer };
 }
 
@@ -53,7 +86,7 @@ function drawScene(gl, programInfo, buffers) {
         2, gl.FLOAT, false, 0, 0);
     
     gl.enableVertexAttribArray(programInfo.attribLocations.vertexPosition);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 6);
 }
 
 window.onload = main;
