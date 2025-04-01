@@ -1,0 +1,35 @@
+**Transformações Geométricas em 2D**
+
+Translações:
+
+Mover um ou mais pontos no espaço 2D.
+
+x' = x + dx
+y' = y + dy
+
+d = Variação da distancia
+
+Escala:
+
+Alterar o tamanho de um objeto no espaço 2D.
+
+x' = x * Sx
+y' = y * Sy
+
+Rotação:
+
+Girar em torno da *origem*.
+
+x' = x * cos(w) - y * sen(w)
+y' = x * sen(w) + y * cos(w)
+
+Sendo w o angulo de rotação;
+
+Para realizar a rotação a partir de um ponto específico, 
+deve translacionar a figura com ponto desejado em cima da origem, 
+entao realizar a rotação normalmente, apos realizar a rotação,
+voltar a figura para o local original com o ponto de rotacao no 
+seu ponto original. 
+
+
+
