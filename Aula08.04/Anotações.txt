@@ -1,0 +1,20 @@
+Multiplicação Matricial
+
+Numero de Linhas da segunda matriz deve ser igual ao numero de colunas da primeira
+
+| b(11) b(12) b(13) b(14) b(15) |     |c(1)|    |a(1)|
+| b(22) b(22) b(23) b(24) b(25) |     |c(2)|    |a(2)|
+| b(31) b(32) b(33) b(34) b(35) |  *  |c(3)| =  |a(3)|
+| b(41) b(42) b(43) b(44) b(45) |     |c(4)|    |a(4)|
+| b(51) b(52) b(53) b(54) b(55) |     |c(5)|    |a(5)|
+
+a(1) = b(11) * c1 + b(12) * c2 + b(13) * c3 + b(14) * c14 + b(15) * c15
+...
+
+Multiplicação de Matrizes com For
+
+for(i=0; i < n-1; i++){
+    for(j=0; j < n-1; j++){
+        resultadoMat(i)(j) += mat1(i)(j) * mat2(i)(j)
+    }
+}
