@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Formas em WebGL</title>
+  </head>
+  <body>
+    <canvas id="canvas" width="400" height="400"></canvas>
+
+    <script type="text/javascript">
+      
+      const canvas = document.getElementById("canvas");
+      const gl = canvas.getContext("webgl");
+
+      
+      if (!gl) {
+        alert("WebGL não está disponível. Por favor, use um navegador compatível.");
+      }
+
+      
+      const triangleVertices = new Float32Array([
+        0.6, -0.47,
+        0.0, 0.0,
+        -0.6,-0.47
+      ]);
+      
+      const squareVertices = new Float32Array([
+       0.5, -0.5,
+       0.5, -1.0,
+       0.1, -1.0,
+       0.1, -0.7,
+       -0.1, -0.7,
+       -0.1, -1.0,
+       -0.5, -1.0,
+       -0.5, -0.5
+      ]);
+
+      const verticesJanela = new Float32Array([
+        0.2, -0.6,
+        0.4, -0.6,
+        0.4, -0.8,
+        0.2, -0.8,
+        0.2, -0.6
+      ])
+
+      const verticesJanela2 = new Float32Array([
+        -0.2, -0.6,
+        -0.4, -0.6,
+        -0.4, -0.8,
+        -0.2, -0.8,
+        -0.2, -0.6
+      ])
+
+      //Código optimizado
+      function createBuffer(vertices){
+        const buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+        return buffer;
+      }
+      
+      const triangleBuffer = createBuffer(triangleVertices);
+      const squareBuffer = createBuffer(squareVertices);
+      const janelaBuffer = createBuffer(verticesJanela);
+      const janelaBuffer2 = createBuffer(verticesJanela2);
+      
+      // Código não optimizado:
+      // const triangleBuffer = gl.createBuffer();
+      // gl.bindBuffer(gl.ARRAY_BUFFER, triangleBuffer);
+      // gl.bufferData(gl.ARRAY_BUFFER, triangleVertices, gl.STATIC_DRAW);
+
+      // const squareBuffer = gl.createBuffer();
+      // gl.bindBuffer(gl.ARRAY_BUFFER, squareBuffer);
+      // gl.bufferData(gl.ARRAY_BUFFER, squareVertices, gl.STATIC_DRAW);
+
+      // const janelaBuffer = gl.createBuffer();
+      // gl.bindBuffer(gl.ARRAY_BUFFER, janelaBuffer);
+      // gl.bufferData(gl.ARRAY_BUFFER, verticesJanela, gl.STATIC_DRAW);
+
+      // const janelaBuffer2 = gl.createBuffer();
+      // gl.bindBuffer(gl.ARRAY_BUFFER, janelaBuffer2);
+      // gl.bufferData(gl.ARRAY_BUFFER, verticesJanela2, gl.STATIC_DRAW);
+
+      
+      const vsSource = `
+        attribute vec2 coordinates;
+        void main(void) {
+          gl_Position = vec4(coordinates, 0.0, 1.0);
+        }
+      `;
+
+      const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+      gl.shaderSource(vertexShader, vsSource);
+      gl.compileShader(vertexShader);
+
+      
+      const fsSource = `
+        void main(void) {
+          gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); 
+        }
+      `;
+
+      const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+      gl.shaderSource(fragmentShader, fsSource);
+      gl.compileShader(fragmentShader);
+
+
+      gl.clearColor(1.0, 1.0, 1.0, 1.0); 
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      
+      function createShape(buffer, pointsNumber){
+        const shaderProgram = gl.createProgram();
+        gl.attachShader(shaderProgram, vertexShader);
+        gl.attachShader(shaderProgram, fragmentShader);
+        gl.linkProgram(shaderProgram);
+        gl.useProgram(shaderProgram);
+
+        const coordinates = gl.getAttribLocation(shaderProgram, "coordinates");
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        gl.vertexAttribPointer(coordinates, 2, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(coordinates);
+      
+        gl.drawArrays(gl.LINE_STRIP, 0, pointsNumber); 
+
+        return shaderProgram;
+      }
+
+      const triangleShaderProgram = createShape(triangleBuffer, 3);
+
+      const squareShaderProgram = createShape(squareBuffer, 8);
+
+      const janelaShaderProgram = createShape(janelaBuffer, 5);
+
+      const janelaShaderProgram2 = createShape(janelaBuffer2, 5);
+      
+      //Codigo não optimizado
+      //Triangle
+      // const triangleShaderProgram = gl.createProgram();
+      // gl.attachShader(triangleShaderProgram, vertexShader);
+      // gl.attachShader(triangleShaderProgram, fragmentShader);
+      // gl.linkProgram(triangleShaderProgram);
+      // gl.useProgram(triangleShaderProgram);
+
+      // const triangleCoord = gl.getAttribLocation(triangleShaderProgram, "coordinates");
+      // gl.bindBuffer(gl.ARRAY_BUFFER, triangleBuffer);
+      // gl.vertexAttribPointer(triangleCoord, 2, gl.FLOAT, false, 0, 0);
+      // gl.enableVertexAttribArray(triangleCoord);
+     
+      // gl.clearColor(1.0, 1.0, 1.0, 1.0); 
+      // gl.clear(gl.COLOR_BUFFER_BIT);
+      // gl.drawArrays(gl.LINE_STRIP, 0, 3); 
+
+      //Square
+      // const squareShaderProgram = gl.createProgram();
+      // gl.attachShader(squareShaderProgram, vertexShader);
+      // gl.attachShader(squareShaderProgram, fragmentShader);
+      // gl.linkProgram(squareShaderProgram);
+      // gl.useProgram(squareShaderProgram);
+      
+      // const squareCoord = gl.getAttribLocation(squareShaderProgram, "coordinates");
+      // gl.bindBuffer(gl.ARRAY_BUFFER, squareBuffer);
+      // gl.vertexAttribPointer(squareCoord, 2, gl.FLOAT, false, 0, 0);
+      // gl.enableVertexAttribArray(squareCoord);
+
+      // gl.drawArrays(gl.LINE_STRIP, 0, 8); 
+
+
+      // //Janela
+      // const janelaShaderProgram = gl.createProgram();
+      // gl.attachShader(janelaShaderProgram, vertexShader);
+      // gl.attachShader(janelaShaderProgram, fragmentShader);
+      // gl.linkProgram(janelaShaderProgram);
+      // gl.useProgram(janelaShaderProgram);
+
+      // const janelaCoord = gl.getAttribLocation(janelaShaderProgram, "coordinates");
+      // gl.bindBuffer(gl.ARRAY_BUFFER, janelaBuffer);
+      // gl.vertexAttribPointer(janelaCoord, 2, gl.FLOAT, false, 0, 0);
+      // gl.enableVertexAttribArray(janelaCoord);
+
+      // gl.drawArrays(gl.LINE_STRIP, 0, 5);
+
+      // //Janela 2
+      // const janelaShaderProgram2 = gl.createProgram();
+      // gl.attachShader(janelaShaderProgram2, vertexShader);
+      // gl.attachShader(janelaShaderProgram2, fragmentShader);
+      // gl.linkProgram(janelaShaderProgram2);
+      // gl.useProgram(janelaShaderProgram2);
+
+      // const janelaCoord2 = gl.getAttribLocation(janelaShaderProgram2, "coordinates");
+      // gl.bindBuffer(gl.ARRAY_BUFFER, janelaBuffer2);
+      // gl.vertexAttribPointer(janelaCoord2, 2, gl.FLOAT, false, 0, 0);
+      // gl.enableVertexAttribArray(janelaCoord2);
+
+      // gl.drawArrays(gl.LINE_STRIP, 0, 5);
+     
+    </script>
+  </body>
+</html>
