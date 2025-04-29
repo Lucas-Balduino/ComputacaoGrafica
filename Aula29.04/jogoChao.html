@@ -1,0 +1,128 @@
+
+<html>
+    <head>
+    <meta charset="utf-8">
+    <title>Salto com Espaço - WebGL</title>
+    <style>
+      body { margin: 0; }
+      canvas { background: #eee; display: block; margin: auto; }
+    </style>
+  </head>
+  <body>
+  <canvas id="canvas" width="500" height="500"></canvas>
+  
+  <script>
+  const canvas = document.getElementById("canvas");
+  const gl = canvas.getContext("webgl");
+  
+  if (!gl) {
+    alert("WebGL não está disponível.");
+  }
+  
+  // Shaders
+  const vertexShaderSource = `
+    attribute vec2 coordinates;
+    uniform vec2 translation;
+    void main(void) {
+      gl_Position = vec4(coordinates + translation, 0.0, 1.0);
+    }
+  `;
+  
+  const fragmentShaderSource = `
+    void main(void) {
+      gl_FragColor = vec4(0.1, 0.1, 0.1, 1.0);
+    }
+  `;
+  
+  function createShader(type, source) {
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    return shader;
+  }
+  
+  const vertexShader = createShader(gl.VERTEX_SHADER, vertexShaderSource);
+  const fragmentShader = createShader(gl.FRAGMENT_SHADER, fragmentShaderSource);
+  
+  const shaderProgram = gl.createProgram();
+  gl.attachShader(shaderProgram, vertexShader);
+  gl.attachShader(shaderProgram, fragmentShader);
+  gl.linkProgram(shaderProgram);
+  gl.useProgram(shaderProgram);
+  
+  // Quadrado
+  const squareVertices = new Float32Array([
+    -0.1, -0.1,
+     0.1, -0.1,
+     0.1,  0.1,
+    -0.1,  0.1
+  ]);
+  
+  const squareBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, squareBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, squareVertices, gl.STATIC_DRAW);
+  
+  // Linha do chão
+  const linhaChao = new Float32Array([
+    -1.0, -0.9,
+     1.0, -0.9
+  ]);
+  
+  const chaoBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, chaoBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, linhaChao, gl.STATIC_DRAW);
+  
+  // Localização dos atributos
+  const coord = gl.getAttribLocation(shaderProgram, "coordinates");
+  const translationLocation = gl.getUniformLocation(shaderProgram, "translation");
+  
+  let y = -0.8;
+  let velocity = 0;
+  let gravity = -0.01;
+  let jumping = false;
+  
+  document.addEventListener("keydown", (e) => {
+    if (e.code === "Space" && !jumping) {
+      velocity = 0.15;
+      jumping = true;
+    }
+  });
+  
+  function animate() {
+    gl.clearColor(1.0, 1.0, 1.0, 1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+  
+    // Atualiza física do pulo
+    if (jumping) {
+      y += velocity;
+      velocity += gravity;
+  
+      if (y <= -0.8) {
+        y = -0.8;
+        velocity = 0;
+        jumping = false;
+      }
+    }
+  
+    // Desenha o chão
+    gl.bindBuffer(gl.ARRAY_BUFFER, chaoBuffer);
+    gl.vertexAttribPointer(coord, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(coord);
+    gl.uniform2fv(translationLocation, [0.0, 0.0]);
+    gl.drawArrays(gl.LINES, 0, 2);
+  
+    // Desenha o quadrado com translação
+    gl.bindBuffer(gl.ARRAY_BUFFER, squareBuffer);
+    gl.vertexAttribPointer(coord, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(coord);
+    gl.uniform2fv(translationLocation, [0.0, y]);
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
+  
+    requestAnimationFrame(animate);
+  }
+  
+  animate();
+  </script>
+  
+  
+  </body></html>
