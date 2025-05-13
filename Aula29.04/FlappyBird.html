@@ -22,6 +22,7 @@ const vertexShaderSource = `
   uniform vec2 translation;
   void main(void) {
     gl_Position = vec4(coordinates + translation, 0.0, 1.0);
+    gl_PointSize = 12.0; // Tamanho dos pixels do pássaro
   }
 `;
 
@@ -65,21 +66,33 @@ gl.useProgram(shaderProgram);
 
 // Coordenadas do personagem (centro na origem)
 const squareVertices = new Float32Array([
-  0, -0.04,
-   0.04, 0,
-   0,  0.04,
-  -0.04,  0,
-  0, -0.04,
-  0,-0.06,
-  -0.04, -0.1,
-  0,-0.06,
-  0.04, -0.1,
-  0,-0.06,
-  0,-0.12,
-  -0.03, -0.2 ,
-  0,-0.12,
-  0.03, -0.2,
-]);
+  -0.06, 0.06,  // Canto superior esquerdo
+   0.06, 0.06,   // Canto superior direito
+   0.06, -0.06,  // Canto inferior direito
+  -0.06, -0.06,  // Canto inferior esquerdo
+  -0.06, 0.06,   // Fechar o retângulo
+
+  // Asa direita (extensão de 2 blocos)
+  0.06, 0.02,
+  0.10, 0.02,
+  0.10, -0.02,
+  0.06, -0.02,
+
+  // Asa esquerda (extensão de 2 blocos)
+  -0.06, 0.02,
+  -0.10, 0.02,
+  -0.10, -0.02,
+  -0.06, -0.02,
+
+  // Bico (triângulo frontal 1x1 bloco)
+  0.06, 0.02,
+  0.08, 0.00,
+  0.06, -0.02,
+
+  // Olho (bloco único)
+  0.02, 0.04,
+  0.04, 0.04
+  ]);
 
 const squareBuffer = gl.createBuffer();
 inicializeBuffer(squareBuffer,squareVertices);
@@ -106,8 +119,8 @@ inicializeBuffer(ceilingBuffer,ceilingVertices);
 const obstacleVertices = new Float32Array([
     -0.05, -0.05,
     0.05, -0.05,
-    0.05,  0.05,
-    -0.05,  0.05,
+    0.05,  0.5,
+    -0.05,  0.5,
     -0.05, -0.05
 ])
 
@@ -116,11 +129,11 @@ inicializeBuffer(obstacleBuffer, obstacleVertices);
 
 //Coordenadas do obstaculo voador
 const flyingObstacleVertices = new Float32Array([
-    -0.05, -0.05,
-    0.05, -0.05,
+    -0.05, -0.5,
+    0.05, -0.5,
     0.05,  0.05,
     -0.05,  0.05,
-    -0.05, -0.05
+    -0.05, -0.5
 ])
 
 const flyingObstacleBuffer = gl.createBuffer();
@@ -154,8 +167,8 @@ function animate() {
   y += velocity;
   velocity += gravity;
 
-  if (y <= -0.8) { // chão
-      y = -0.8;
+  if (y <= -0.93) { // chão
+      y = -0.93 ;
       velocity = 0;
       jumping = false;
     } 
@@ -184,9 +197,9 @@ function animate() {
 
   objectInicialization(floorBuffer,0,0,2);
   objectInicialization(ceilingBuffer,0,0,2);
-  objectInicialization(squareBuffer,0,y,14);
+  objectInicialization(squareBuffer,0,y,18);
   objectInicialization(obstacleBuffer,x1,-0.94,5);
-  objectInicialization(flyingObstacleBuffer,(x2 + 0.5),-0.45,5); 
+  objectInicialization(flyingObstacleBuffer,(x2 + 0.5),0.44,5); 
 
   requestAnimationFrame(animate);
 }
