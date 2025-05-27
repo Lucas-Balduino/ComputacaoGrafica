@@ -2,17 +2,23 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Jogo - WebGL com Cores</title>
+  <title>JetPack Joyride</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
   <style>
-    body { margin: 0; }
+    body { margin: 0; position: relative; font-family: 'Pixelify Sans', sans-serif; }
     canvas { background: #eee; display: block; margin: auto; }
+    #pontuation { position: absolute; top: 10px; left: 47%; color: #333; background: rgba(255,255,255,0.8); padding: 5px 8px; border-radius: 4px; font-size: 30px; }
   </style>
 </head>
 <body>
+<div id="pontuation">0000 m</div>
 <canvas id="canvas" width="500" height="500"></canvas>
 
 <script>
 (async function() {
+  const pontuation = document.getElementById("pontuation");
   const canvas = document.getElementById("canvas");
   const gl = canvas.getContext("webgl");
 
@@ -106,18 +112,43 @@
 
   const floorBuffer   = initBuffer(new Float32Array([-1, -1, 1, -1]));
   const ceilingBuffer = initBuffer(new Float32Array([-1, 0.5, 1, 0.5]));
-  const obstacleVerts = new Float32Array([
-    -0.05, -0.05, 0.05, -0.05,
-     0.05,  0.05, -0.05,  0.05,
+  const verticalObstacleVerts = new Float32Array([
+    -0.05, -0.05, 
+    0.05, -0.05,
+    0.05,  0.35, 
+    -0.05,  0.35,
     -0.05, -0.05
   ]);
-  const obstacleBuffer = initBuffer(obstacleVerts);
-  const obsCount = obstacleVerts.length / 2;
+  const verticalObstacleBuffer = initBuffer(verticalObstacleVerts);
+  
+  const horizontalObstacleVerts = new Float32Array([
+    -0.05, -0.05, 
+    0.25, -0.05,
+    0.25,  0.05, 
+    -0.05,  0.05,
+    -0.05, -0.05
+  ]);
+  
+  const horizontalObstacleBuffer = initBuffer(horizontalObstacleVerts);
+  const obsCount = horizontalObstacleVerts.length / 2;
 
   // Estado do jogo
   let y = -0.8, velocity = 0, gravity = -0.001;
-  let x1 = 1, x2 = 1, obsVel1 = 0.03, obsVel2 = 0.02;
+  let x1 = 1, x2 = 1;
+  let obstacleVelocity = 0.01;
+  let y1,y2,y3 = 0;
   let jumping = false;
+  let points = 0;
+
+  setInterval (()=> {
+    points += 1;
+    obstacleVelocity += 0.00003;
+    pontuation.textContent = points.toString().padStart(4, '0') + ' m';
+  },100);
+
+  function getRandomFloat(min, max) {
+    return Math.random() * (max - min) + min;
+  }
 
   document.addEventListener('keydown', e => {
     if ((e.code === 'Space' || e.code === 'ArrowUp')) {
@@ -154,23 +185,35 @@
     gl.clearColor(1,1,1,1);
     gl.clear(gl.COLOR_BUFFER_BIT);
     
-    // física do salto
+    // Física do salto
     y += velocity;
     velocity += gravity;
+
+    //Chão
     if (y <= -0.8) { 
         y = -0.8; 
         velocity = 0; 
         jumping = false; 
     }
+    //Teto
     if (y >= 0.5) { 
         y = 0.5; 
         jumping = false; 
     }
 
-    x1 -= obsVel1; 
-    if (x1 <= -1) x1 = 1;
-    x2 -= obsVel2; 
-    if (x2 <= -1.4) x2 = 1;
+    //Obstáculos
+    x1 -= obstacleVelocity; 
+    if (x1 <= -1) {
+      x1 = 1;
+      y1 = getRandomFloat(-1, 0.4);
+    }
+    x2 -= obstacleVelocity; 
+    if (x2 <= -1.4){
+      x2 = 1;
+      y2 = getRandomFloat(-1, 0.4);
+      y3 = getRandomFloat(-1, 0.4);
+    }
+
 
     // desenha chão e teto
     drawSimple(floorBuffer, 2, gl.LINES, [0,0]);
@@ -178,8 +221,9 @@
     // desenha personagem com cores
     draw(posBuffer, vertexCount, gl.POINTS, [0, (y-0.93)]);
     // desenha obstáculos
-    drawSimple(obstacleBuffer, obsCount, gl.LINE_STRIP, [x1, -0.94]);
-    drawSimple(obstacleBuffer, obsCount, gl.LINE_STRIP, [x2+0.5, -0.45]);
+    drawSimple(verticalObstacleBuffer, obsCount, gl.LINE_STRIP, [x1, y1]);
+    drawSimple(verticalObstacleBuffer, obsCount, gl.LINE_STRIP, [x2+0.5, y2]);
+    drawSimple(horizontalObstacleBuffer, obsCount, gl.LINE_STRIP, [x2+0.5, y3]);
 
     requestAnimationFrame(animate);
   }
